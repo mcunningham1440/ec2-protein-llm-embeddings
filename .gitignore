@@ -1,6 +1,7 @@
 scratch_notebook.ipynb
 scratchpad.txt
 .DS_Store
+config.cfg
 
 __pycache__/
 .ipynb_checkpoints
