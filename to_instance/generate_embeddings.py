@@ -25,7 +25,7 @@ for batch_indices in batch_idx_generator(len(proteins), 32):
     input = tokenizer(test_seqs, return_tensors='pt', padding=True, truncation=False)
 
     with torch.no_grad():
-        outputs = model(**inputs).last_hidden_state
+        outputs = model(**input).last_hidden_state
     
     outputs = outputs[:,1:-1,:].mean(1)
 
