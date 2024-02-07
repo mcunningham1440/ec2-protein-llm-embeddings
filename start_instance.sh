@@ -1,4 +1,6 @@
-source Desktop/Coding/llm_pipeline_parallel/config.cfg
+source Desktop/Coding/ec2-protein-llm-embeddings/config.cfg
+
+mkdir -p $OUTPUT_SAVE_DIR
 
 aws ec2 run-instances \
 --image-id $AMI_ID \
@@ -15,8 +17,25 @@ read INSTANCE_IPV4 INSTANCE_ID <<< $(aws ec2 describe-instances \
     --query 'Reservations[*].Instances[*].[PublicIpAddress,InstanceId]' \
     --output text)
 
+echo "Launching instance..."
+
 aws ec2 wait instance-running --instance-ids $INSTANCE_ID
+
+echo "Instance launched. Copying files..."
 
 scp -r -i $KEY_PATH $TO_INSTANCE_DIR ec2-user@$INSTANCE_IPV4:~
 
-ssh -i $KEY_PATH ec2-user@$INSTANCE_IPV4 'bash -s' < 'setup_and_launch.sh'
+echo "Files copied. Initiating embedding generation..."
+
+# ssh -i $KEY_PATH ec2-user@$INSTANCE_IPV4 'bash ~/to_instance/setup_and_launch.sh'
+
+# echo "Embeddings generated. Copying output to local machine..."
+# scp -i $KEY_PATH ec2-user@$INSTANCE_IPV4:'protein_embeddings.npz' "$OUTPUT_SAVE_DIR/protein_embeddings.npz"
+
+# echo "Output copied successfully. Terminating instace..."
+
+# aws ec2 terminate-instances --instance-ids $INSTANCE_ID
+
+# aws ec2 wait instance-terminated --instance-ids $INSTANCE_ID
+
+# echo "Instance terminated successfully"
