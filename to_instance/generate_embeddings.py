@@ -4,10 +4,10 @@ import torch
 import numpy as np
 import pandas as pd
 
-model_path = "facebook/esm2_t48_15B_UR50D"
-n_gpus = 4
+model_path = "facebook/esm2_t36_3B_UR50D"
+n_gpus = 1
 gpu_memory = 24
-batch_size = 32
+batch_size = 1
 max_seq_length = 1024
 
 model_config = EsmConfig.from_pretrained(model_path)
@@ -33,15 +33,15 @@ embeddings_dict = {}
 for batch_indices in batch_idx_generator(len(proteins), batch_size):
     test_seqs = proteins['Sequence'].iloc[batch_indices].tolist()
     batch_protein_names = proteins['UniProt'].iloc[batch_indices].tolist()
-    input = tokenizer(test_seqs, return_tensors='pt', padding=True, truncation=False)
+    test_seqs = tokenizer(test_seqs, return_tensors='pt', padding=True, truncation=False).to(0)
 
     with torch.no_grad():
-        outputs = model(**input).last_hidden_state
+        outputs = model(**test_seqs).last_hidden_state
     
     outputs = outputs[:,1:-1,:].mean(1)
 
     for name, embedding in zip(batch_protein_names, outputs):
-        embeddings_dict[name] = embedding.numpy()
+        embeddings_dict[name] = embedding.to('cpu').numpy()
 
     print(f"{batch_indices[-1] + 1} of {len(proteins)} generated")
 

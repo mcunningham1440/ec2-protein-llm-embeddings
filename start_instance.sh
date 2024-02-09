@@ -2,6 +2,8 @@ source Desktop/Coding/ec2-protein-llm-embeddings/config.cfg
 
 mkdir -p $OUTPUT_SAVE_DIR
 
+INSTANCE_NAME="${INSTANCE_NAME}_$(date +%d-%m-%y_%H-%M)"
+
 aws ec2 run-instances \
 --image-id $AMI_ID \
 --count 1 \
@@ -23,14 +25,14 @@ aws ec2 wait instance-running --instance-ids $INSTANCE_ID
 
 echo "Instance launched. Copying files..."
 
-scp -r -i $KEY_PATH $TO_INSTANCE_DIR ec2-user@$INSTANCE_IPV4:~
+scp -o StrictHostKeyChecking=no -r -i $KEY_PATH $TO_INSTANCE_DIR ec2-user@$INSTANCE_IPV4:~  || { echo "Failed to copy files. Interrupting script."; exit 1; }
 
 echo "Files copied. Initiating embedding generation..."
 
-ssh -i $KEY_PATH ec2-user@$INSTANCE_IPV4 'bash ~/to_instance/setup_and_launch.sh'
+ssh -o StrictHostKeyChecking=no -i $KEY_PATH ec2-user@$INSTANCE_IPV4 'bash ~/to_instance/setup_and_launch.sh' || { echo "Failed to launch embedding script. Interrupting script."; exit 1; }
 
 echo "Embeddings generated. Copying output to local machine..."
-scp -i $KEY_PATH ec2-user@$INSTANCE_IPV4:'protein_embeddings.npz' "$OUTPUT_SAVE_DIR/protein_embeddings.npz"
+scp -o StrictHostKeyChecking=no -i $KEY_PATH ec2-user@$INSTANCE_IPV4:'protein_embeddings.npz' "$OUTPUT_SAVE_DIR/protein_embeddings.npz"   || { echo "Failed to copy embeddings. Interrupting script."; exit 1; }
 
 echo "Output copied successfully. Terminating instace..."
 
