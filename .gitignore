@@ -6,4 +6,5 @@ config.cfg
 __pycache__/
 .ipynb_checkpoints
 config.cfg
+protein_embeddings.npz
 esm2_t48_15B_UR50D/
