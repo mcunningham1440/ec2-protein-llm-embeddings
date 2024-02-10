@@ -4,8 +4,8 @@ import torch
 import numpy as np
 import pandas as pd
 
-model_path = "facebook/esm2_t36_3B_UR50D" #Path to HuggingFace repo for model
-n_gpus = 1
+model_path = "facebook/esm2_t48_15B_UR50D" #Path to HuggingFace repo for model
+n_gpus = 4
 gpu_memory = 24 #GiB of memory per GPU
 batch_size = 1 #n of sequences to embed at once
 max_seq_length = 1024 #Maximum protein sequence length allowed by model
