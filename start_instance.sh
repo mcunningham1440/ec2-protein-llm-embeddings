@@ -1,3 +1,4 @@
+# Replace this with the path to your config file
 source Desktop/Coding/ec2-protein-llm-embeddings/config.cfg
 
 mkdir -p $OUTPUT_SAVE_DIR
@@ -29,6 +30,9 @@ aws ec2 wait instance-running --instance-ids $INSTANCE_ID
 # initiated immediately after instance-running is returned
 echo "Instance launched. Copying files..."
 
+# IMPORTANT! This will not terminate the instance if the interruption is tripped!
+# Instance will only terminate automatically if the entire script executes successfully
+# If it does not, terminate the instance manually to avoid costs!
 scp -o StrictHostKeyChecking=no -r -i $KEY_PATH $TO_INSTANCE_DIR ec2-user@$INSTANCE_IPV4:~  || { echo "Failed to copy files. Interrupting script."; exit 1; }
 
 echo "Files copied. Initiating embedding generation..."
@@ -36,6 +40,7 @@ echo "Files copied. Initiating embedding generation..."
 ssh -o StrictHostKeyChecking=no -i $KEY_PATH ec2-user@$INSTANCE_IPV4 'bash ~/to_instance/setup_and_launch.sh' || { echo "Failed to launch embedding script. Interrupting script."; exit 1; }
 
 echo "Embeddings generated. Copying output to local machine..."
+
 scp -o StrictHostKeyChecking=no -i $KEY_PATH ec2-user@$INSTANCE_IPV4:'protein_embeddings.npz' "$OUTPUT_SAVE_DIR/protein_embeddings.npz" || { echo "Failed to copy embeddings. Interrupting script."; exit 1; }
 
 echo "Output copied successfully. Terminating instace..."
